@@ -21,6 +21,9 @@ class ClimbingTrackerGUI:
         self.evaluate_button = tk.Button(master, text="Evaluate Difficulty", command=self.evaluate_difficulty)
         self.evaluate_button.pack(pady=10)
 
+        self.highest_route_button = tk.Button(master, text="Display Highest Route", command=self.display_highest_route)
+        self.highest_route_button.pack(pady=10)
+
     def load_data(self):
         try:
             with open("climbing_data.json", "r") as file:
@@ -92,6 +95,14 @@ class ClimbingTrackerGUI:
             average_difficulty = total_attempts / total_completed
 
         messagebox.showinfo("Average Difficulty", f"Average Difficulty: {average_difficulty}")
+
+    def display_highest_route(self):
+        if not self.routes:
+            messagebox.showinfo("Highest Route", "No routes recorded.")
+            return
+
+        highest_route = max(self.routes, key=lambda r: self.grade_to_number(r['grade']))
+        messagebox.showinfo("Highest Route", f"Highest Route: {highest_route['name']} with Grade: {highest_route['grade']}")
 
 # Main application
 root = tk.Tk()
