@@ -101,8 +101,9 @@ class ClimbingTrackerGUI:
             messagebox.showinfo("Highest Route", "No routes recorded.")
             return
 
-        highest_route = max(self.routes, key=lambda r: self.grade_to_number(r['grade']))
-        messagebox.showinfo("Highest Route", f"Highest Route: {highest_route['name']} with Grade: {highest_route['grade']}")
+        highest_route = max(self.routes, key=lambda r: r['grade'])
+        messagebox.showinfo("Highest Route",
+                            f"Highest Route: {highest_route['name']} with Grade: {highest_route['grade']}")
 
 # Main application
 root = tk.Tk()
