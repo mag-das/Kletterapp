@@ -12,7 +12,7 @@ The project has the following file structure:
 climbing-tracker
 ├── climbing_data.json
 ├── climbing_tracker.py
-└── requirements.txt
+requirements.txt
 README.md
 ```
 - `climbing_data.jason`: This file includes all the saved climbing routes, difficulty levels, number of attempts and completed(yes/no) provided via user input
