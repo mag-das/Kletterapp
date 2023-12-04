@@ -8,7 +8,7 @@ The project has the following file structure:
 ```
 climbing-tracker
 ├── data
-│   └── climbing_data.jason
+│   └── climbing_data.json
 ├── src
 │   └── climbing_tracker.py
 ├── README.md
