@@ -25,4 +25,4 @@ To use the climbing tracker, run the `climbing_tracker.py` script. The script wi
 
 
 ## Requirements
-To install the required packages, run pip install -r requirements.txt.
+To install the required packages, run pip install -r `requirements.txt`.
