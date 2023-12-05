@@ -52,7 +52,7 @@ class ClimbingTrackerGUI:
         route_name_entry = tk.Entry(add_route_window)
         route_name_entry.pack()
 
-        tk.Label(add_route_window, text="Route Grade:").pack()
+        tk.Label(add_route_window, text="Route Grade (UIAA):").pack()
         route_grade_entry = tk.Entry(add_route_window)
         route_grade_entry.pack()
 
@@ -67,39 +67,40 @@ class ClimbingTrackerGUI:
         def save_route():
             # Save the entered route information to the list and file
             name = route_name_entry.get()
-            grade = route_grade_entry.get()
-            attempts = int(attempts_entry.get())
+            grade_str = route_grade_entry.get()
+            attempts_str = attempts_entry.get()
             completed = completed_entry.get().lower() == 'yes'
 
             # Validate grade input
-    if not grade_str.isdigit() or not (1 <= int(grade_str) <= 10):
-        messagebox.showerror("Error", "Please enter a route grade between 1 and 10.")
-        return
+            if not grade_str.isdigit() or not (1 <= int(grade_str) <= 11):
+                messagebox.showerror("Error", "Please enter a valid UIAA route grade between 1 and 11.")
+                return
 
-    grade = int(grade_str)
+            grade = int(grade_str)
 
-    # Validate attempts input
-    if not attempts_str.isdigit() or int(attempts_str) < 1:
-        messagebox.showerror("Error", "Number of attempts must be a positive number.")
-        return
+            # Validate attempts input
+            if not attempts_str.isdigit() or int(attempts_str) < 1:
+                messagebox.showerror("Error", "Number of attempts must be a positive number.")
+                return
 
-    # Grade-specific message
-    grade_messages = {
-        10: "What a pro! Can we take a selfie?",
-        9: "Outstanding job! Do your friends know about this?",
-        8: "Atta Boy/Girl!",
-        7: "Not too shabby!",
-        6: "You are getting there!",
-        5: "Halfway to the top!",
-        4: "Keep climbing, you're doing great!",
-        3: "I can feel something big happening!",
-        2: "This is just the beginning!",
-        1: "We all start somewhere..."
-    }
+            attempts = int(attempts_str)
 
-    messagebox.showinfo("Grade Feedback", grade_messages[grade])
+            # Grade-specific message
+            grade_messages = {
+                11: "What a pro! Can we take a selfie?",
+                10: "Incredible achievement, you're at the top!",
+                9: "Outstanding job! Do your friends know about this?",
+                8: "Atta Boy/Girl! Keep pushing!",
+                7: "Not too shabby, you're doing great!",
+                6: "You're getting stronger!",
+                5: "Halfway to the top!",
+                4: "Keep climbing, you're doing great!",
+                3: "I can feel something big happening!",
+                2: "This is just the beginning!",
+                1: "We all start somewhere..."
+            }
 
-    attempts = int(attempts_str)
+            messagebox.showinfo("Grade Feedback", grade_messages.get(grade, "Unknown grade"))
 
             route = {
                 "name": name,
@@ -125,13 +126,12 @@ class ClimbingTrackerGUI:
         # Insert route information into the text widget
         for route in self.routes:
             status = "Completed" if route["completed"] else "Not Completed"
-            progress_text.insert(tk.END, f"{route['name']} - Grade: {route['grade']}, "
-                                          f"Attempts: {route['attempts']}, Status: {status}\n")
+            progress_text.insert(tk.END, f"{route['name']} - Grade: {route['grade']}, Attempts: {route['attempts']}, Status: {status}\n")
 
     def evaluate_difficulty(self):
         # Calculate and display the average difficulty of completed routes
         total_attempts = sum(route["attempts"] for route in self.routes)
-        total_completed = sum(route["completed"] for route in self.routes)
+        total_completed = sum(1 for route in self.routes if route["completed"])
 
         if total_completed == 0:
             average_difficulty = 0
@@ -147,8 +147,7 @@ class ClimbingTrackerGUI:
             return
 
         highest_route = max(self.routes, key=lambda r: r['grade'])
-        messagebox.showinfo("Highest Route",
-                            f"Highest Route: {highest_route['name']} with Grade: {highest_route['grade']}")
+        messagebox.showinfo("Highest Route", f"Highest Route: {highest_route['name']} with Grade: {highest_route['grade']}")
 
 # Main application
 root = tk.Tk()
