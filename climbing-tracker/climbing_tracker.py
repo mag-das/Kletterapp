@@ -1,7 +1,6 @@
 import json
 import tkinter as tk
 from tkinter import messagebox
-from statistics import mean
 
 class ClimbingTrackerGUI:
     def __init__(self, master):
@@ -72,11 +71,9 @@ class ClimbingTrackerGUI:
             completed = completed_entry.get().lower() == 'yes'
 
             # Validate grade input
-            if not grade_str.isdigit() or not (1 <= int(grade_str) <= 11):
-                messagebox.showerror("Error", "Please enter a valid UIAA route grade between 1 and 11.")
+            if not self.validate_grade(grade_str):
+                messagebox.showerror("Error", "Invalid grade. Enter a UIAA grade (1-11)")
                 return
-
-            grade = int(grade_str)
 
             # Validate attempts input
             if not attempts_str.isdigit() or int(attempts_str) < 1:
@@ -100,11 +97,12 @@ class ClimbingTrackerGUI:
                 1: "We all start somewhere..."
             }
 
-            messagebox.showinfo("Grade Feedback", grade_messages.get(grade, "Unknown grade"))
+            base_grade = int(grade_str.rstrip("+-"))  # Extract base grade for message
+            messagebox.showinfo("Grade Feedback", grade_messages.get(base_grade, "Great effort! Keep climbing!"))
 
             route = {
                 "name": name,
-                "grade": grade,
+                "grade": grade_str,
                 "attempts": attempts,
                 "completed": completed
             }
@@ -113,6 +111,13 @@ class ClimbingTrackerGUI:
             add_route_window.destroy()
 
         tk.Button(add_route_window, text="Save Route", command=save_route).pack()
+
+    def validate_grade(self, grade_str):
+        """Validate the UIAA grade with optional '+' or '-'."""
+        if grade_str.endswith('+') or grade_str.endswith('-'):
+            grade_str = grade_str[:-1]
+
+        return grade_str.isdigit() and 1 <= int(grade_str) <= 11
 
     def visualize_progress(self):
         # Open a new window to visualize climbing progress
