@@ -71,6 +71,36 @@ class ClimbingTrackerGUI:
             attempts = int(attempts_entry.get())
             completed = completed_entry.get().lower() == 'yes'
 
+            # Validate grade input
+    if not grade_str.isdigit() or not (1 <= int(grade_str) <= 10):
+        messagebox.showerror("Error", "Please enter a route grade between 1 and 10.")
+        return
+
+    grade = int(grade_str)
+
+    # Validate attempts input
+    if not attempts_str.isdigit() or int(attempts_str) < 1:
+        messagebox.showerror("Error", "Number of attempts must be a positive number.")
+        return
+
+    # Grade-specific message
+    grade_messages = {
+        10: "What a pro! Can we take a selfie?",
+        9: "Outstanding job! Do your friends know about this?",
+        8: "Atta Boy/Girl!",
+        7: "Not too shabby!",
+        6: "You are getting there!",
+        5: "Halfway to the top!",
+        4: "Keep climbing, you're doing great!",
+        3: "I can feel something big happening!",
+        2: "This is just the beginning!",
+        1: "We all start somewhere..."
+    }
+
+    messagebox.showinfo("Grade Feedback", grade_messages[grade])
+
+    attempts = int(attempts_str)
+
             route = {
                 "name": name,
                 "grade": grade,
