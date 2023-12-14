@@ -64,24 +64,44 @@ class ClimbingTrackerGUI:
         completed_entry = tk.Entry(add_route_window)
         completed_entry.pack()
 
-        def save_route():
-            # Save the entered route information to the list and file
-            name = route_name_entry.get()
-            grade = route_grade_entry.get()
-            attempts = int(attempts_entry.get())
-            completed = completed_entry.get().lower() == 'yes'
+    def save_route():
+    # Retrieve the entered route information
+    name = route_name_entry.get()
+    grade_str = route_grade_entry.get()
+    attempts_str = attempts_entry.get()
+    completed_str = completed_entry.get().lower()
 
-            # Validate grade input
+    # Check for empty inputs
+    # route name
+    if not name.strip():
+        messagebox.showerror("Error", "Please enter a route name.")
+        return
+    # route grade
+    if not grade_str.strip():
+        messagebox.showerror("Error", "Please enter a route grade.")
+        return
+    # number of attempts
+    if not attempts_str.strip():
+        messagebox.showerror("Error", "Please enter the number of attempts.")
+        return
+
+    # Validate grade input
     if not grade_str.isdigit() or not (1 <= int(grade_str) <= 10):
         messagebox.showerror("Error", "Please enter a route grade between 1 and 10.")
         return
-
     grade = int(grade_str)
 
     # Validate attempts input
     if not attempts_str.isdigit() or int(attempts_str) < 1:
         messagebox.showerror("Error", "Number of attempts must be a positive number.")
         return
+    attempts = int(attempts_str)
+
+     # Validate completed input
+    if completed_str not in ['yes', 'no']:
+        messagebox.showerror("Error", "Completed field must be 'yes' or 'no'.")
+        return
+    completed = completed_str == 'yes'
 
     # Grade-specific message
     grade_messages = {
@@ -98,8 +118,6 @@ class ClimbingTrackerGUI:
     }
 
     messagebox.showinfo("Grade Feedback", grade_messages[grade])
-
-    attempts = int(attempts_str)
 
             route = {
                 "name": name,
