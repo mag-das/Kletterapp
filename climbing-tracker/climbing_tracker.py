@@ -12,8 +12,14 @@ class ClimbingTrackerGUI:
         # List to store climbing route data
         self.routes = []
 
+        # Initiate empty dicitionary to store information
+        self.user_details = {}
+
         # Load existing data from file
         self.load_data()
+
+        # Call the registration window first
+        self.registration_window()
 
         # Create buttons for different actions
         self.add_route_button = tk.Button(master, text="Add Route", command=self.add_route)
@@ -27,6 +33,59 @@ class ClimbingTrackerGUI:
 
         self.highest_route_button = tk.Button(master, text="Display Highest Route", command=self.display_highest_route)
         self.highest_route_button.pack(pady=10)
+
+    def registration_window(self):
+        reg_window = tk.Toplevel(self.master)
+        reg_window.title("User Registration")
+
+        # Fields: Name, Age, Email, Climbing Level, Gender
+        tk.Label(reg_window, text="Name:").pack()
+        self.name_entry = tk.Entry(reg_window)
+        self.name_entry.pack()
+
+        tk.Label(reg_window, text="Age:").pack()
+        self.age_entry = tk.Entry(reg_window)
+        self.age_entry.pack()
+
+        tk.Label(reg_window, text="Email:").pack()
+        self.email_entry = tk.Entry(reg_window)
+        self.email_entry.pack()
+
+        tk.Label(reg_window, text="Climbing Level:").pack()
+        self.level_entry = tk.Entry(reg_window)
+        self.level_entry.pack()
+
+        tk.Label(reg_window, text="Gender:").pack()
+        self.gender_entry = tk.Entry(reg_window)
+        self.gender_entry.pack()
+
+        tk.Button(reg_window, text="Register", command=self.save_user_details).pack()
+
+    def save_user_details(self):
+        # Save user details into the user_details dictionary
+        self.user_details = {
+            "name": self.name_entry.get(),
+            "age": self.age_entry.get(),
+            "email": self.email_entry.get(),
+            "level": self.level_entry.get(),
+            "gender": self.gender_entry.get()
+
+    # Validate age input
+        if not age_str.isdigit():
+        messagebox.showerror("Invalid Input", "Age must be an integer.")
+        return
+
+    # Convert age string to integer
+        age = int(age_str)
+
+    # Save user details into the user_details dictionary
+        self.user_details = {
+            "name": name,
+            "age": age,
+            "email": email,
+            "level": level,
+            "gender": gender
+    }
 
     def load_data(self):
         # Load existing climbing route data from a JSON file
