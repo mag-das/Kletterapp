@@ -2,7 +2,9 @@ import json
 import tkinter as tk
 from tkinter import messagebox
 from datetime import datetime
-
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class ClimbingTrackerGUI:
     def __init__(self, master):
@@ -74,9 +76,13 @@ class ClimbingTrackerGUI:
 
         # Create buttons for different actions
         tk.Button(self.master, text="Add Route", command=self.add_route).pack(pady=10)
-        tk.Button(self.master, text="Visualize Progress", command=self.visualize_progress).pack(pady=10)
         tk.Button(self.master, text="Evaluate Difficulty", command=self.evaluate_difficulty).pack(pady=10)
-        tk.Button(self.master, text="Display Highest Route", command=self.display_highest_route).pack(pady=10)
+
+        # Visualize Progress directly in the UI
+        self.visualize_progress()
+
+        # Display all routes initially
+        self.display_all_routes()
 
     def save_data(self):
         # Save climbing route data to a JSON file
@@ -178,56 +184,22 @@ class ClimbingTrackerGUI:
         messagebox.showinfo("Grade Feedback", grade_messages.get(grade, "Great effort!"))
 
     def visualize_progress(self):
-        # Open a new window to visualize climbing progress
-        progress_window = tk.Toplevel(self.master)
-        progress_window.title("Climbing Progress")
+        # Create a DataFrame from routes for visualization
+        df = pd.DataFrame(self.routes)
 
-        # Display user's name
-        user_name = self.user_details.get("name", "Unknown User")
-        tk.Label(progress_window, text=f"User: {user_name}").pack()
+        # Create a bar chart using Matplotlib
+        plt.figure(figsize=(8, 4))
+        ax = plt.subplot(111)
+        df.groupby(['grade', 'completed']).size().unstack().plot(kind='bar', stacked=True, ax=ax)
+        ax.set_title('Climbing Progress')
+        ax.set_xlabel('Route Grade')
+        ax.set_ylabel('Number of Routes')
+        ax.legend(title='Completion Status')
 
-        # Section for Filtering Options
-        filter_frame = tk.Frame(progress_window)
-        filter_frame.pack(pady=10)
-
-        # Filtering by Grade
-        tk.Label(filter_frame, text="Filter by Grade (1-10):").grid(row=0, column=0)
-        self.filter_grade_entry = tk.Entry(filter_frame)
-        self.filter_grade_entry.grid(row=0, column=1)
-
-        # Filtering by Date Range
-        tk.Label(filter_frame, text="Filter by Date Range (YYYY-MM-DD):").grid(row=1, column=0)
-        self.filter_date_start_entry = tk.Entry(filter_frame, width=12)
-        self.filter_date_start_entry.grid(row=1, column=1)
-        tk.Label(filter_frame, text="to").grid(row=1, column=2)
-        self.filter_date_end_entry = tk.Entry(filter_frame, width=12)
-        self.filter_date_end_entry.grid(row=1, column=3)
-
-        # Filtering by User Name
-        tk.Label(filter_frame, text="Filter by User Name:").grid(row=2, column=0)
-        self.filter_user_name_entry = tk.Entry(filter_frame)
-        self.filter_user_name_entry.grid(row=2, column=1)
-
-        tk.Button(filter_frame, text="Apply Filter", command=self.apply_filter).grid(row=3, columnspan=4)
-
-        # Section for Sorting Options
-        sorting_frame = tk.Frame(progress_window)
-        sorting_frame.pack(pady=10)
-        tk.Label(sorting_frame, text="Sort by:").pack(side=tk.LEFT)
-        self.sort_var = tk.StringVar(value="date")  # default sort by date
-        tk.Radiobutton(sorting_frame, text="Date", variable=self.sort_var, value="date").pack(side=tk.LEFT)
-        tk.Radiobutton(sorting_frame, text="Grade", variable=self.sort_var, value="grade").pack(side=tk.LEFT)
-
-        # Apply Filter and Sort button
-        tk.Button(progress_window, text="Apply Filter and Sort", command=self.apply_filter).pack(pady=10)
-
-        # Text widget to display progress information
-        self.progress_text = tk.Text(progress_window, height=10)
-        self.progress_text.pack(pady=10)
-
-        # Display all routes initially
-        self.display_all_routes()
-
+        # Display the Matplotlib chart using FigureCanvasTkAgg
+        canvas = FigureCanvasTkAgg(plt.gcf(), master=self.master)
+        canvas.draw()
+        canvas.get_tk_widget().pack()
     def display_all_routes(self):
         self.progress_text.delete(1.0, tk.END)
         for route in self.routes:
@@ -303,4 +275,5 @@ class ClimbingTrackerGUI:
 root = tk.Tk()
 app = ClimbingTrackerGUI(root)
 root.mainloop()
+
 
