@@ -2,7 +2,4 @@ json
 tkinter
 statistics
 pandas
-plotly.express
-datetime
-matplotlib.pyplot
-matplotlib.backends.backend_tkagg
+matplotlib
