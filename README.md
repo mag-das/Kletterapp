@@ -22,7 +22,7 @@ README.md
 - `requirements.txt`: This file lists the required Python packages for the project, including json, tkinter, statistics
 
 ## Usage
-To use the climbing tracker, run the `climbing_tracker.py` script. The script asks the user to register then input their climbing routes and allows them to visualise and track their climbing progress.
+To use the climbing tracker, run the `climbing_tracker.py` script. The script asks the user to login then input their climbing routes and allows them to visualise and track their climbing progress.
 
 ## Requirements
 To install the required packages, run pip install -r `requirements.txt`.
