@@ -3,3 +3,7 @@ tkinter
 statistics
 pandas
 plotly.express
+datetime
+pandas
+matplotlib.pyplot
+matplotlib.backends.backend_tkagg
