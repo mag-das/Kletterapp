@@ -18,10 +18,23 @@ class ClimbingTrackerGUI:
 
         # Call the registration window first
         self.registration_window()
+        self.progress_text = tk.Text(self.paned_window())
+
+    def paned_window(self):
+        paned_window = tk.PanedWindow(self.master, orient=tk.HORIZONTAL)
+        frame1 = tk.Frame(paned_window)
+        frame2 = tk.Frame(paned_window)
+
+        # Add the frames to the paned window
+        paned_window.add(frame1)
+        paned_window.add(frame2)
+
+        # Optionally return paned_window if needed
+        return paned_window
 
     def registration_window(self):
         self.reg_window = tk.Toplevel()
-        self.reg_window.title("User Registration")
+        self.reg_window.title("User Login")
         self.reg_window.protocol("WM_DELETE_WINDOW", self.on_registration_close)  # Handle close button
 
         tk.Label(self.reg_window, text="Name:").pack()
@@ -32,15 +45,11 @@ class ClimbingTrackerGUI:
         self.age_entry = tk.Entry(self.reg_window)
         self.age_entry.pack()
 
-        tk.Label(self.reg_window, text="Email:").pack()
-        self.email_entry = tk.Entry(self.reg_window)
-        self.email_entry.pack()
-
         tk.Label(self.reg_window, text="Climbing Level:").pack()
         self.level_entry = tk.Entry(self.reg_window)
         self.level_entry.pack()
 
-        tk.Button(self.reg_window, text="Register", command=self.save_user_details).pack()
+        tk.Button(self.reg_window, text="Login", command=self.save_user_details).pack()
 
     def on_registration_close(self):
         # Optional: Define behavior when registration window is closed without registering
@@ -50,7 +59,6 @@ class ClimbingTrackerGUI:
     def save_user_details(self):
         name = self.name_entry.get()
         age_str = self.age_entry.get()
-        email = self.email_entry.get()
         level = self.level_entry.get()
 
         if not age_str.isdigit():
@@ -61,15 +69,18 @@ class ClimbingTrackerGUI:
         self.user_details = {
             "name": name,
             "age": age,
-            "email": email,
             "level": level
         }
 
         with open("user_details.json", "w") as file:
             json.dump(self.user_details, file, indent=2)
 
-        self.reg_window.destroy()
         self.initialize_main_window()
+
+        # Call visualize_initial_progress after registration
+        self.visualize_progress()
+
+        self.reg_window.destroy()
 
     def list_progress(self):
         progress_window = tk.Toplevel(self.master)
@@ -103,6 +114,10 @@ class ClimbingTrackerGUI:
 
         # Display all routes initially
         self.display_all_routes()
+
+        # Visualize initial progress
+
+
 
     def save_data(self):
         # Save climbing route data to a JSON file
@@ -206,6 +221,8 @@ class ClimbingTrackerGUI:
         # Enable the visualize button if it's disabled
         if self.visualize_button['state'] == tk.DISABLED:
             self.visualize_button['state'] = tk.NORMAL
+
+
     def list_progress(self):
         # Open a new window to visualize climbing progress
         progress_window = tk.Toplevel(self.master)
@@ -270,16 +287,21 @@ class ClimbingTrackerGUI:
         # Create a bar chart using Matplotlib
         plt.figure(figsize=(8, 4))
         ax = plt.subplot(111)
-        df.groupby(['grade', 'completed']).size().unstack().plot(kind='bar', stacked=True, ax=ax)
-        ax.set_title('Climbing Progress')
-        ax.set_xlabel('Route Grade')
-        ax.set_ylabel('Number of Routes')
-        ax.legend(title='Completion Status')
+
+        # Group by both 'grade' and 'climbing_level', and unstack the results
+        df_grouped = df.groupby(['grade', 'completed']).size().unstack()
+        df_grouped.plot(kind='bar', stacked=True, ax=ax)
 
         # Display the Matplotlib chart using FigureCanvasTkAgg
         canvas = FigureCanvasTkAgg(plt.gcf(), master=self.master)
         canvas.draw()
         canvas.get_tk_widget().pack()
+
+        ax.set_title('Climbing Progress')
+        ax.set_xlabel('Grade and Climbing Level')
+        ax.set_ylabel('Number of Routes')
+        ax.legend(title='Completion Status')
+
     def display_all_routes(self):
         self.progress_text.delete(1.0, tk.END)
         for route in self.routes:
