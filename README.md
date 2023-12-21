@@ -16,7 +16,7 @@ requirements.txt
 README.md
 ```
 - `climbing_data.json`: This file includes all the saved climbing routes, difficulty levels, number of attempts and completed(yes/no) provided via user input
-- `user_details.json`: This file includes the user information name, age and level.  
+- `user_details.json`: This file includes the user information name, age and level
 - `climbing_tracker`: This file is the main script for the project. It interacts with the user via an interface in which the user can insert information on the climbing routes. It also evaluates the user input and provides statistics on the climbing development of the user.
 - `README.md`: This file contains the documentation for the project.
 - `requirements.txt`: This file lists the required Python packages for the project, including json, tkinter, statistics
