@@ -6,15 +6,31 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+def route_matches_filter(route, filter_grade, filter_date_start, filter_date_end, filter_user_name):
+    # Check if route matches the grade filter
+    if filter_grade and route["grade"] != int(filter_grade):
+        return False
+
+    # Check if route matches the date filter
+    if filter_date_start and route["date"] < filter_date_start:
+        return False
+    if filter_date_end and route["date"] > filter_date_end:
+        return False
+    if filter_user_name and route["user"].lower() != filter_user_name.lower():
+        return False
+    return True
+
+
+# set up GUI to create the interface for user
 class ClimbingTrackerGUI:
     def __init__(self, master):
         self.master = master
         self.master.title("Climbing Route Tracker")
         self.master.withdraw()  # Initially hide the main window
 
-        self.routes = []
-        self.user_details = {}
-        self.load_data()
+        self.routes = []  # List to store climbing routes
+        self.user_details = {}  # Dictionary to store user details
+        self.load_data()  # Load data from JSON files
 
         # Call the registration window first
         self.registration_window()
@@ -33,22 +49,28 @@ class ClimbingTrackerGUI:
         return paned_window
 
     def registration_window(self):
+        # Create a new top-level window for user login.
         self.reg_window = tk.Toplevel()
         self.reg_window.title("User Login")
-        self.reg_window.protocol("WM_DELETE_WINDOW", self.on_registration_close)  # Handle close button
+        # Set a protocol for the window's close button.
+        self.reg_window.protocol("WM_DELETE_WINDOW", self.on_registration_close)
 
+        # create entry widget
         tk.Label(self.reg_window, text="Name:").pack()
         self.name_entry = tk.Entry(self.reg_window)
         self.name_entry.pack()
 
+        # create entry widget
         tk.Label(self.reg_window, text="Age:").pack()
         self.age_entry = tk.Entry(self.reg_window)
         self.age_entry.pack()
 
+        # create entry widget
         tk.Label(self.reg_window, text="Climbing Level:").pack()
         self.level_entry = tk.Entry(self.reg_window)
         self.level_entry.pack()
 
+        # Add and pack a label for the "Climbing Level" field in the registration window.
         tk.Button(self.reg_window, text="Login", command=self.save_user_details).pack()
 
     def on_registration_close(self):
@@ -57,32 +79,41 @@ class ClimbingTrackerGUI:
         self.master.destroy()
 
     def save_user_details(self):
+        # Retrieve the input values from the entry fields in the registration window.
         name = self.name_entry.get()
         age_str = self.age_entry.get()
         level = self.level_entry.get()
 
+        # Validate the age input to ensure it's a numeric value.
         if not age_str.isdigit():
             messagebox.showerror("Invalid Input", "Age must be an integer.")
             return
 
+        # Convert the age from a string to an integer.
         age = int(age_str)
+
+        # Store the user details in a dictionary.
         self.user_details = {
             "name": name,
             "age": age,
             "level": level
         }
 
+        # Save the user details to a JSON file for persistent storage.
         with open("user_details.json", "w") as file:
             json.dump(self.user_details, file, indent=2)
 
+        # Initialize main window and close registration window
         self.initialize_main_window()
-
-        # Call visualize_initial_progress after registration
-        self.visualize_progress()
-
         self.reg_window.destroy()
 
+    def display_initial_level(self):
+        # Display initial climbing level in a message box
+        initial_level = self.user_details.get("level", "Unknown")
+        messagebox.showinfo("Initial Level", f"Your initial climbing level is: {initial_level}")
+
     def list_progress(self):
+        # This new top-level window is intended to display the user's climbing progress.
         progress_window = tk.Toplevel(self.master)
         progress_window.title("Climbing Progress")
 
@@ -96,28 +127,22 @@ class ClimbingTrackerGUI:
     def initialize_main_window(self):
         self.master.deiconify()  # Show the main window
 
+        # Display initial climbing level entered by user
+        level_label_text = f"Initial Climbing Level: {self.user_details.get('level', 'Unknown')}"
+        self.level_label = tk.Label(self.master, text=level_label_text)
+        self.level_label.pack()
+
         # Create buttons for different actions
         tk.Button(self.master, text="Add Route", command=self.add_route).pack(pady=10)
         tk.Button(self.master, text="Evaluate Difficulty", command=self.evaluate_difficulty).pack(pady=10)
-
-        # List Progress button
-        tk.Button(self.master, text="List Progress", command=self.list_progress).pack(pady=10)
-
-        # Visualize Progress button (disabled initially)
-        self.visualize_button = tk.Button(self.master, text="Visualize Progress", command=self.visualize_progress,
-                                          state=tk.DISABLED)
-        self.visualize_button.pack(pady=10)
-
-        # Check if there are routes to enable the visualize button
-        if self.routes:
-            self.visualize_button['state'] = tk.NORMAL
+        tk.Button(self.master, text="List Routes", command=self.list_progress).pack(pady=10)
 
         # Display all routes initially
         self.display_all_routes()
 
-        # Visualize initial progress
-
-
+        # Visualize initial progress if enough data
+        if self.routes:
+            self.visualize_progress()
 
     def save_data(self):
         # Save climbing route data to a JSON file
@@ -125,19 +150,24 @@ class ClimbingTrackerGUI:
             json.dump(self.routes, file, indent=2)
 
     def load_data(self):
+        # Load climbing routes from a JSON file
         try:
             with open("climbing_data.json", "r") as file:
-                self.routes = json.load(file)
+                self.routes = json.load(file) # Load routes data into self.routes
         except FileNotFoundError:
+            # If the file doesn't exist, initialize self.routes as an empty list
             self.routes = []
 
         try:
+            # Load user details from a JSON file
             with open("user_details.json", "r") as file:
                 self.user_details = json.load(file)
         except FileNotFoundError:
+            # If the file doesn't exist, initialize self.user_details as an empty dictionary
             self.user_details = {}
 
     def add_route(self):
+        # Create a new window for adding a climbing route
         self.add_route_window = tk.Toplevel(self.master)
         self.add_route_window.title("Add Route")
 
@@ -158,15 +188,17 @@ class ClimbingTrackerGUI:
         self.completed_entry = tk.Entry(self.add_route_window)
         self.completed_entry.pack()
 
+        # Button to trigger the save_route function
         tk.Button(self.add_route_window, text="Save Route", command=self.save_route).pack()
 
     def save_route(self):
+        # Retrieve inputs from the add route window fields
         name = self.route_name_entry.get()
         grade_str = self.route_grade_entry.get()
         attempts_str = self.attempts_entry.get()
         completed_str = self.completed_entry.get().lower()
 
-        # Check for empty inputs
+        # Check for empty inputs and show error messages if invalid
         if not name.strip():
             messagebox.showerror("Error", "Please enter a route name.")
             return
@@ -180,10 +212,12 @@ class ClimbingTrackerGUI:
             messagebox.showerror("Error", "Completed field must be 'yes' or 'no'.")
             return
 
+        # Convert string inputs to their appropriate types
         grade = int(grade_str)
         attempts = int(attempts_str)
         completed = completed_str == 'yes'
 
+        # Get the current date
         current_date = datetime.now().strftime("%Y-%m-%d")
 
         # Add the new route to the routes list
@@ -202,7 +236,7 @@ class ClimbingTrackerGUI:
         # Close the add route window
         self.add_route_window.destroy()
 
-        # Grade-specific message
+        # Show a grade-specific message after saving the route
         grade_messages = {
             10: "What a pro! Can we take a selfie?",
             9: "Outstanding job! Do your friends know about this?",
@@ -218,10 +252,8 @@ class ClimbingTrackerGUI:
 
         messagebox.showinfo("Grade Feedback", grade_messages.get(grade, "Great effort!"))
 
-        # Enable the visualize button if it's disabled
-        if self.visualize_button['state'] == tk.DISABLED:
-            self.visualize_button['state'] = tk.NORMAL
-
+        # Automatically update the visualization after adding a new route
+        self.visualize_progress()
 
     def list_progress(self):
         # Open a new window to visualize climbing progress
@@ -254,6 +286,7 @@ class ClimbingTrackerGUI:
         self.filter_user_name_entry = tk.Entry(filter_frame)
         self.filter_user_name_entry.grid(row=2, column=1)
 
+        # Button to apply filters
         tk.Button(filter_frame, text="Apply Filter", command=self.apply_filter).grid(row=3, columnspan=4)
 
         # Section for Sorting Options
@@ -270,7 +303,7 @@ class ClimbingTrackerGUI:
         tk.Radiobutton(sorting_frame, text="Date", variable=self.sort_var, value="date").pack(side=tk.LEFT)
         tk.Radiobutton(sorting_frame, text="Grade", variable=self.sort_var, value="grade").pack(side=tk.LEFT)
 
-        # Apply Filter and Sort button
+        # Button to apply filter and sort
         tk.Button(progress_window, text="Apply Filter and Sort", command=self.apply_filter).pack(pady=10)
 
         # Text widget to display progress information
@@ -281,6 +314,11 @@ class ClimbingTrackerGUI:
         self.display_all_routes()
 
     def visualize_progress(self):
+        # Check if there's enough data to visualize
+        if len(self.routes) < 2:  # Set minimum number of routes to visualize
+            # Optional: Display a message or handle this silently
+            return
+
         # Create a DataFrame from routes for visualization
         df = pd.DataFrame(self.routes)
 
@@ -288,24 +326,34 @@ class ClimbingTrackerGUI:
         plt.figure(figsize=(8, 4))
         ax = plt.subplot(111)
 
-        # Group by both 'grade' and 'climbing_level', and unstack the results
+        # Group by both 'grade' and 'completed', and unstack the results
         df_grouped = df.groupby(['grade', 'completed']).size().unstack()
         df_grouped.plot(kind='bar', stacked=True, ax=ax)
 
-        # Display the Matplotlib chart using FigureCanvasTkAgg
-        canvas = FigureCanvasTkAgg(plt.gcf(), master=self.master)
-        canvas.draw()
-        canvas.get_tk_widget().pack()
+        # Prepare the canvas for the plot and display it in the Tkinter window
+        if hasattr(self, 'canvas'):
+            self.canvas.get_tk_widget().pack_forget()
+            self.canvas = None
 
+        self.canvas = FigureCanvasTkAgg(plt.gcf(), master=self.master)
+        self.canvas.draw()
+        self.canvas.get_tk_widget().pack()
+
+        # Set titles and labels for the chart
         ax.set_title('Climbing Progress')
         ax.set_xlabel('Grade and Climbing Level')
         ax.set_ylabel('Number of Routes')
         ax.legend(title='Completion Status')
 
     def display_all_routes(self):
+        # This ensures that when new data is displayed, the old data is removed.
         self.progress_text.delete(1.0, tk.END)
+        # Iterates through each route in the self.routes list to list all
+        # determines the status 'completed' or 'not completed'
         for route in self.routes:
+            # Determine the status of the route - whether it is completed or not
             status = "Completed" if route["completed"] else "Not Completed"
+            # Construct a string with route details including name, date, grade, attempts, and status.
             self.progress_text.insert(tk.END, f"{route['name']} - Date: {route['date']}, Grade: {route['grade']}, "
                                               f"Attempts: {route['attempts']}, Status: {status}\n")
 
@@ -318,8 +366,8 @@ class ClimbingTrackerGUI:
 
         # Filter routes
         filtered_routes = [route for route in self.routes if
-                           self.route_matches_filter(route, filter_grade, filter_date_start, filter_date_end,
-                                                     filter_user_name)]
+                           route_matches_filter(route, filter_grade, filter_date_start, filter_date_end,
+                                                filter_user_name)]
 
         # Sort routes based on user selection
         sort_by = self.sort_var.get()
@@ -335,20 +383,6 @@ class ClimbingTrackerGUI:
             self.progress_text.insert(tk.END, f"{route['name']} - Date: {route['date']}, Grade: {route['grade']}, "
                                               f"Attempts: {route['attempts']}, Status: {status}\n")
 
-    def route_matches_filter(self, route, filter_grade, filter_date_start, filter_date_end, filter_user_name):
-        # Check if route matches the grade filter
-        if filter_grade and route["grade"] != int(filter_grade):
-            return False
-
-        # Check if route matches the date filter
-        if filter_date_start and route["date"] < filter_date_start:
-            return False
-        if filter_date_end and route["date"] > filter_date_end:
-            return False
-        if filter_user_name and route["user"].lower() != filter_user_name.lower():
-            return False
-        return True
-
     def evaluate_difficulty(self):
         # Calculate and display the average grade of completed routes
         completed_routes = [route for route in self.routes if route["completed"]]
@@ -359,7 +393,8 @@ class ClimbingTrackerGUI:
             average_grade = 0
         else:
             average_grade = total_grades / number_of_completed_routes
-
+            
+        # Display the average grade in a message box.
         messagebox.showinfo("Average Difficulty", f"Average Grade of Completed Routes: {average_grade:.2f}")
 
     def display_highest_route(self):
@@ -377,6 +412,5 @@ class ClimbingTrackerGUI:
 root = tk.Tk()
 app = ClimbingTrackerGUI(root)
 root.mainloop()
-
 
 
