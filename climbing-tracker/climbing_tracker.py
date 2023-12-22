@@ -6,20 +6,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-def route_matches_filter(route, filter_grade, filter_date_start, filter_date_end, filter_user_name):
-    # Check if route matches the grade filter
-    if filter_grade and route["grade"] != int(filter_grade):
-        return False
-
-    # Check if route matches the date filter
-    if filter_date_start and route["date"] < filter_date_start:
-        return False
-    if filter_date_end and route["date"] > filter_date_end:
-        return False
-    if filter_user_name and route["user"].lower() != filter_user_name.lower():
-        return False
-    return True
-
 
 # set up GUI to create the interface for user
 class ClimbingTrackerGUI:
@@ -45,7 +31,6 @@ class ClimbingTrackerGUI:
         paned_window.add(frame1)
         paned_window.add(frame2)
 
-        # Optionally return paned_window if needed
         return paned_window
 
     def registration_window(self):
@@ -74,12 +59,10 @@ class ClimbingTrackerGUI:
         tk.Button(self.reg_window, text="Login", command=self.save_user_details).pack()
 
     def on_registration_close(self):
-        # Optional: Define behavior when registration window is closed without registering
         self.reg_window.destroy()
         self.master.destroy()
 
     def save_user_details(self):
-        # Retrieve the input values from the entry fields in the registration window.
         name = self.name_entry.get()
         age_str = self.age_entry.get()
         level = self.level_entry.get()
@@ -113,7 +96,7 @@ class ClimbingTrackerGUI:
         messagebox.showinfo("Initial Level", f"Your initial climbing level is: {initial_level}")
 
     def list_progress(self):
-        # This new top-level window is intended to display the user's climbing progress.
+        # This top-level window is intended to display the user's climbing progress.
         progress_window = tk.Toplevel(self.master)
         progress_window.title("Climbing Progress")
 
@@ -153,7 +136,7 @@ class ClimbingTrackerGUI:
         # Load climbing routes from a JSON file
         try:
             with open("climbing_data.json", "r") as file:
-                self.routes = json.load(file) # Load routes data into self.routes
+                self.routes = json.load(file)  # Load routes data into self.routes
         except FileNotFoundError:
             # If the file doesn't exist, initialize self.routes as an empty list
             self.routes = []
@@ -314,15 +297,14 @@ class ClimbingTrackerGUI:
         self.display_all_routes()
 
     def visualize_progress(self):
-        # Check if there's enough data to visualize
-        if len(self.routes) < 2:  # Set minimum number of routes to visualize
-            # Optional: Display a message or handle this silently
+        # Set minimum number of routes to visualize
+        if len(self.routes) < 2:
             return
 
         # Create a DataFrame from routes for visualization
         df = pd.DataFrame(self.routes)
 
-        # Create a bar chart using Matplotlib
+        # Create a bar chart
         plt.figure(figsize=(8, 4))
         ax = plt.subplot(111)
 
@@ -330,7 +312,7 @@ class ClimbingTrackerGUI:
         df_grouped = df.groupby(['grade', 'completed']).size().unstack()
         df_grouped.plot(kind='bar', stacked=True, ax=ax)
 
-        # Prepare the canvas for the plot and display it in the Tkinter window
+        # Prepare the canvas for the plot and display it
         if hasattr(self, 'canvas'):
             self.canvas.get_tk_widget().pack_forget()
             self.canvas = None
@@ -393,7 +375,7 @@ class ClimbingTrackerGUI:
             average_grade = 0
         else:
             average_grade = total_grades / number_of_completed_routes
-            
+
         # Display the average grade in a message box.
         messagebox.showinfo("Average Difficulty", f"Average Grade of Completed Routes: {average_grade:.2f}")
 
@@ -407,10 +389,21 @@ class ClimbingTrackerGUI:
         messagebox.showinfo("Highest Route",
                             f"Highest Route: {highest_route['name']} with Grade: {highest_route['grade']}")
 
+def route_matches_filter(route, filter_grade, filter_date_start, filter_date_end, filter_user_name):
+    # Check if route matches the grade filter
+    if filter_grade and route["grade"] != int(filter_grade):
+        return False
+
+    # Check if route matches the date filter
+    if filter_date_start and route["date"] < filter_date_start:
+        return False
+    if filter_date_end and route["date"] > filter_date_end:
+        return False
+    if filter_user_name and route["user"].lower() != filter_user_name.lower():
+        return False
+    return True
 
 # Main application
 root = tk.Tk()
 app = ClimbingTrackerGUI(root)
 root.mainloop()
-
-
