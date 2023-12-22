@@ -2,7 +2,7 @@
 Skills: Programming with Advanced Computer Languages
 
 # Climbing Tracker
-This is a Python-based project that climbers can use to track their climbing history and evaluate their development. It uses the json, tkinter and statistics libraries.
+This is a Python-based project that climbers can use to track their climbing history and evaluate their development. It uses the json, tkinter, pandas and matplot libraries.
 
  ## Project Structure
 The project has the following file structure:
